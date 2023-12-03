@@ -49,10 +49,11 @@ struct Line {
     symbols: Vec<Symbol>,
 }
 impl Line {
-    fn new(index: usize, line: String) -> Line {
+    /// Complicated method to find numbers on a line and as well as it's
+    /// x-axis indices.
+    fn numbers(index: usize, line: &String) -> Vec<Number> {
         let split_lines = line.split("");
-
-        let res: Vec<(usize, usize)> = split_lines
+        let enumerated: Vec<(usize, usize)> = split_lines
             .clone()
             .enumerate()
             .filter_map(|(idx, val)| match val.parse::<usize>().ok() {
@@ -65,7 +66,7 @@ impl Line {
         let mut subsequents: Vec<Vec<(usize, usize)>> = vec![];
         let mut new: Vec<(usize, usize)> = vec![];
 
-        for (idx, val) in res.clone() {
+        for (idx, val) in enumerated.clone() {
             if prev.is_none() {
                 new.push((idx, val));
                 prev = Some(idx);
@@ -79,17 +80,19 @@ impl Line {
 
             new.push((idx, val));
             prev = Some(idx);
-            if (idx, val) == *res.clone().last().unwrap() {
+            if (idx, val) == *enumerated.clone().last().unwrap() {
                 subsequents.push(new.clone());
             }
         }
 
-        let numbers = subsequents
+        subsequents
             .iter()
             .filter_map(|pair| Number::new(index, pair))
-            .collect();
+            .collect()
+    }
 
-        let symbols = split_lines
+    fn symbols(index: usize, line: &String) -> Vec<Symbol> {
+        line.split("")
             .enumerate()
             .filter_map(|(idx, item)| {
                 if item.is_empty() {
@@ -102,7 +105,12 @@ impl Line {
 
                 Symbol::new(index, (idx, character))
             })
-            .collect();
+            .collect()
+    }
+
+    fn new(index: usize, line: String) -> Line {
+        let numbers = Line::numbers(index, &line);
+        let symbols = Line::symbols(index, &line);
 
         Line { numbers, symbols }
     }
@@ -128,7 +136,7 @@ impl Number {
             v => v - 1,
         };
         let right = match self.index.clone().last().unwrap() {
-            139 => 139,
+            139 => 139, // amount of characters on any line in input.txt
             v => v + 1,
         };
         adjacent_x.insert(0, left);
@@ -181,13 +189,9 @@ impl Symbol {
     }
 }
 
-fn solution_one() {
-    let string: String = read_to_string("input.txt").expect("couldnt read file");
-    let split: Vec<&str> = string.split("\n").filter(|x| !x.is_empty()).collect();
-    let client = Client::new(split);
-
-    let symbols = &client.symbols();
-    let numbers = &client.numbers();
+fn solution_one(client: &Client) {
+    let symbols = client.symbols();
+    let numbers = client.numbers();
 
     let mut res: Vec<usize> = vec![];
 
@@ -198,13 +202,9 @@ fn solution_one() {
     dbg!(res.iter().sum::<usize>());
 }
 
-fn solution_two() {
-    let string: String = read_to_string("input.txt").expect("couldnt read file");
-    let split: Vec<&str> = string.split("\n").filter(|x| !x.is_empty()).collect();
-    let client = Client::new(split);
-
+fn solution_two(client: &Client) {
     let stars = client.stars();
-    let numbers = &client.numbers();
+    let numbers = client.numbers();
 
     let mut res: Vec<usize> = vec![];
 
@@ -220,6 +220,10 @@ fn solution_two() {
     dbg!(res.iter().sum::<usize>());
 }
 fn main() {
-    solution_one();
-    solution_two();
+    let string: String = read_to_string("input.txt").expect("couldnt read file");
+    let split: Vec<&str> = string.split("\n").filter(|x| !x.is_empty()).collect();
+    let client = Client::new(split);
+
+    solution_one(&client);
+    solution_two(&client);
 }
