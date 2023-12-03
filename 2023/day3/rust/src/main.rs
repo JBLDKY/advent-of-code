@@ -56,10 +56,7 @@ impl Line {
         let enumerated: Vec<(usize, usize)> = split_lines
             .clone()
             .enumerate()
-            .filter_map(|(idx, val)| match val.parse::<usize>().ok() {
-                Some(val) => Some((idx, val)),
-                None => None,
-            })
+            .filter_map(|(idx, val)| val.parse::<usize>().ok().map(|val| (idx, val)))
             .collect();
 
         let mut prev: Option<usize> = None;
@@ -99,7 +96,7 @@ impl Line {
                     return None;
                 }
                 let character = item.chars().last().unwrap();
-                if character == '.' || character.is_digit(10) {
+                if character == '.' || character.is_ascii_digit() {
                     return None;
                 }
 
@@ -124,8 +121,8 @@ struct Number {
 }
 impl Number {
     fn new(y: usize, pair: &Vec<(usize, usize)>) -> Option<Number> {
-        let value: Vec<usize> = pair.iter().map(|(_, v)| v.clone()).collect();
-        let index: Vec<usize> = pair.iter().map(|(i, _)| i.clone()).collect();
+        let value: Vec<usize> = pair.iter().map(|(_, v)| *v).collect();
+        let index: Vec<usize> = pair.iter().map(|(i, _)| *i).collect();
 
         Some(Number { y, value, index })
     }
@@ -146,7 +143,7 @@ impl Number {
         let origin = vec![*adjacent_x.first().unwrap(), y_min];
         let end = vec![*adjacent_x.last().unwrap(), self.y + 1];
 
-        return (origin, end);
+        (origin, end)
     }
 }
 
@@ -163,7 +160,7 @@ impl Symbol {
     }
 
     fn position(&self) -> (usize, usize) {
-        return (self.index, self.y);
+        (self.index, self.y)
     }
 
     fn collisions(&self, numbers: Vec<Number>) -> Vec<usize> {
@@ -221,7 +218,7 @@ fn solution_two(client: &Client) {
 }
 fn main() {
     let string: String = read_to_string("input.txt").expect("couldnt read file");
-    let split: Vec<&str> = string.split("\n").filter(|x| !x.is_empty()).collect();
+    let split: Vec<&str> = string.split('\n').filter(|x| !x.is_empty()).collect();
     let client = Client::new(split);
 
     solution_one(&client);
