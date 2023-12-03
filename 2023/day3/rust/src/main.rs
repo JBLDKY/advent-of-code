@@ -51,7 +51,7 @@ struct Line {
 impl Line {
     /// Complicated method to find numbers on a line and as well as it's
     /// x-axis indices.
-    fn numbers(index: usize, line: &String) -> Vec<Number> {
+    fn numbers(index: usize, line: &str) -> Vec<Number> {
         let split_lines = line.split("");
         let enumerated: Vec<(usize, usize)> = split_lines
             .clone()
@@ -88,7 +88,7 @@ impl Line {
             .collect()
     }
 
-    fn symbols(index: usize, line: &String) -> Vec<Symbol> {
+    fn symbols(index: usize, line: &str) -> Vec<Symbol> {
         line.split("")
             .enumerate()
             .filter_map(|(idx, item)| {
@@ -120,7 +120,7 @@ struct Number {
     index: Vec<usize>,
 }
 impl Number {
-    fn new(y: usize, pair: &Vec<(usize, usize)>) -> Option<Number> {
+    fn new(y: usize, pair: &[(usize, usize)]) -> Option<Number> {
         let value: Vec<usize> = pair.iter().map(|(_, v)| *v).collect();
         let index: Vec<usize> = pair.iter().map(|(i, _)| *i).collect();
 
